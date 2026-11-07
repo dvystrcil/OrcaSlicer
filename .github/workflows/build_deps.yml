@@ -163,11 +163,26 @@ jobs:
       - name: Build on Ubuntu
         if: runner.os == 'Linux'
         working-directory: ${{ github.workspace }}
+        env:
+          ORCASLICER_BUILD_LOG: ${{ runner.temp }}/orcaslicer-build-deps.log
+        shell: bash
         run: |
+          set -euo pipefail
+          {
             mkdir -p ${{ github.workspace }}/deps/build/destdir
             ./build_linux.sh -drlL
             cd deps/build
             tar -czvf OrcaSlicer_dep_ubuntu_$(date +"%Y%m%d").tar.gz destdir
+          } 2>&1 | tee "$ORCASLICER_BUILD_LOG"
+
+      - name: Upload Linux dependency build log
+        if: ${{ always() && runner.os == 'Linux' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: orcaslicer-linux-dependency-build-log-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/orcaslicer-build-deps.log
+          if-no-files-found: warn
+          retention-days: 14
 
 
       # Upload Artifacts
