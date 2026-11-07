@@ -17,8 +17,35 @@ permissions:
   contents: read
 
 jobs:
+  runner-preflight:
+    name: ARC runner identity and sudo
+    runs-on: orcaslicer-runner
+    steps:
+      - name: Verify runner is non-root and passwordless sudo works
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Runner identity:"
+          id
+          if [ "$(id -u)" -eq 0 ]; then
+            echo "::error::ARC runner is running as root. This runner must remain non-root."
+            exit 1
+          fi
+          if ! command -v sudo >/dev/null 2>&1; then
+            echo "::error::sudo is not installed in the runner image."
+            exit 1
+          fi
+          if ! sudo -n true; then
+            echo "::error::The non-root runner cannot use passwordless sudo."
+            exit 1
+          fi
+          echo "Effective sudo identity:"
+          sudo -n id
+          test "$(sudo -n id -u)" -eq 0
+
   linux-x86_64:
     name: Linux x86_64
+    needs: runner-preflight
     uses: ./.github/workflows/build_check_cache.yml
     with:
       os: orcaslicer-runner
