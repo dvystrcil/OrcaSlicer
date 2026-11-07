@@ -1,0 +1,37 @@
+name: Linux ARC baseline build
+
+on:
+  push:
+    branches:
+      - baseline-2.4.2
+    paths:
+      - '**'
+      - '!.github/workflows/linux-arc-baseline.yml'
+  pull_request:
+    branches:
+      - baseline-2.4.2
+  workflow_dispatch:
+    inputs:
+      force-build:
+        description: Rebuild dependencies even when the dependency cache is available
+        required: false
+        type: boolean
+        default: false
+
+# Keep the expensive native C++ build serialized on the shared ARC capacity.
+concurrency:
+  group: orcaslicer-linux-baseline-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  linux-x86_64:
+    name: Linux x86_64
+    uses: ./.github/workflows/build_check_cache.yml
+    with:
+      os: orcaslicer-runner
+      build-deps-only: false
+      force-build: ${{ inputs.force-build || false }}
+    secrets: inherit
