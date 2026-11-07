@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - baseline-2.4.2
-    paths:
-      - '**'
-      - '!.github/workflows/linux-arc-baseline.yml'
   pull_request:
     branches:
       - baseline-2.4.2
@@ -18,9 +15,9 @@ on:
         type: boolean
         default: false
 
-# Keep the expensive native C++ build serialized on the shared ARC capacity.
+# Serialize this expensive native C++ build across branch, PR, and manual runs.
 concurrency:
-  group: orcaslicer-linux-baseline-${{ github.ref }}
+  group: orcaslicer-linux-baseline
   cancel-in-progress: false
 
 permissions:
