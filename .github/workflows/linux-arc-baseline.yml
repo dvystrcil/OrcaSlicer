@@ -7,15 +7,8 @@ on:
   pull_request:
     branches:
       - baseline-2.4.2
-  workflow_dispatch:
-    inputs:
-      force-build:
-        description: Rebuild dependencies even when the dependency cache is available
-        required: false
-        type: boolean
-        default: false
 
-# Serialize this expensive native C++ build across branch, PR, and manual runs.
+# Serialize this expensive native C++ build across branch and PR runs.
 concurrency:
   group: orcaslicer-linux-baseline
   cancel-in-progress: false
@@ -30,5 +23,5 @@ jobs:
     with:
       os: orcaslicer-runner
       build-deps-only: false
-      force-build: ${{ inputs.force-build || false }}
+      force-build: false
     secrets: inherit
