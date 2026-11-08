@@ -40,19 +40,19 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           lfs: 'false'
 
       - name: load cached deps
         if: ${{ !(runner.os == 'macOS' && inputs.macos-combine-only) }}
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ github.workspace }}/${{ inputs.cache-path }}
           key: ${{ inputs.cache-key }}
           fail-on-cache-miss: true
 
-      - uses: lukka/get-cmake@latest
+      - uses: lukka/get-cmake@f86dd60acae0d132056913e248bdabf0e0580b7a # v4.4.5
         with:
           cmakeVersion: "~4.3.0"  # use most recent 4.3.x version
           useLocalCache: true         # <--= Use the local cache (default is 'false').
@@ -78,7 +78,7 @@ jobs:
         id: ccache
         if: ${{ !inputs.macos-combine-only }}
         continue-on-error: true
-        uses: hendrikmuhs/ccache-action@v1.2.24
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
           key: ${{ env.CCACHE_LEG }}
           max-size: 3G
@@ -90,7 +90,7 @@ jobs:
       - name: Restore compiler cache
         id: ccache_restore
         if: ${{ steps.ccache.outcome == 'success' }}
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ env.CCACHE_ENTRY }}
@@ -203,7 +203,7 @@ jobs:
 
       - name: Upload Test Artifact mac
         if: runner.os == 'macOS' && !inputs.macos-combine-only && inputs.arch == 'arm64'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: ${{ github.sha }}-tests-macos-arm64
           overwrite: true
@@ -227,14 +227,14 @@ jobs:
 
       - name: Upload macOS app bundle ${{ inputs.arch }}
         if: runner.os == 'macOS' && !inputs.macos-combine-only
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Mac_bundle_${{ inputs.arch }}_${{ github.sha }}
           path: ${{ github.workspace }}/OrcaSlicer_Mac_bundle_${{ inputs.arch }}_${{ github.sha }}.tar.gz
 
       - name: Download macOS app bundles
         if: runner.os == 'macOS' && inputs.macos-combine-only
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: OrcaSlicer_Mac_bundle_*_${{ github.sha }}
           path: ${{ github.workspace }}/mac_bundles
@@ -382,7 +382,7 @@ jobs:
       # failed run keeps them available for a re-run instead of forcing a full rebuild.
       - name: Delete intermediate per-arch artifacts
         if: success() && runner.os == 'macOS' && inputs.macos-combine-only
-        uses: geekyeggo/delete-artifact@v6
+        uses: geekyeggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
         with:
           name: |
             OrcaSlicer_Mac_bundle_arm64_${{ github.sha }}
@@ -390,14 +390,14 @@ jobs:
 
       - name: Upload artifacts mac
         if: runner.os == 'macOS' && inputs.macos-combine-only
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Mac_universal_${{ env.ver }}
           path: ${{ github.workspace }}/OrcaSlicer_Mac_universal_${{ env.ver }}.dmg
 
       - name: Upload OrcaSlicer_profile_validator DMG mac
         if: runner.os == 'macOS' && inputs.macos-combine-only && !vars.SELF_HOSTED
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_profile_validator_Mac_universal_DMG_${{ env.ver }}
           path: ${{ github.workspace }}/OrcaSlicer_profile_validator_Mac_universal_${{ env.ver }}.dmg
@@ -433,7 +433,7 @@ jobs:
 
       - name: setup MSVC
         if: runner.os == 'Windows'
-        uses: microsoft/setup-msbuild@v3
+        uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3
 
       # NSIS builds the installer. A pinned portable copy is kept in the Actions
       # cache, so most runs never download it, and a cache miss fetches the
@@ -443,7 +443,7 @@ jobs:
       - name: Restore NSIS
         id: nsis-cache
         if: runner.os == 'Windows' && !vars.SELF_HOSTED
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ runner.temp }}/nsis
           key: nsis-${{ env.NSIS_VERSION }}
@@ -470,7 +470,7 @@ jobs:
 
       - name: Save NSIS
         if: runner.os == 'Windows' && !vars.SELF_HOSTED && steps.nsis-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ runner.temp }}/nsis
           key: nsis-${{ env.NSIS_VERSION }}
@@ -502,7 +502,7 @@ jobs:
 
       - name: Set up Java for code signing
         if: steps.codesign.outcome == 'success'
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
           distribution: microsoft
           java-version: '21'
@@ -531,7 +531,7 @@ jobs:
       - name: Authenticate to Google Cloud for code signing
         id: codesign_auth
         if: steps.codesign.outcome == 'success'
-        uses: google-github-actions/auth@v3
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
         with:
           workload_identity_provider: ${{ vars.WINDOWS_SIGN_WIF_PROVIDER }}
           service_account: ${{ vars.WINDOWS_SIGN_SERVICE_ACCOUNT }}
@@ -561,7 +561,7 @@ jobs:
 
       - name: Upload Test Artifact Win
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: ${{ github.sha }}-tests-windows-${{ inputs.arch }}
           overwrite: true
@@ -620,28 +620,28 @@ jobs:
 
       - name: Upload artifacts Win zip
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Windows_${{ env.ver }}${{ env.ARCH_SUFFIX }}_portable
           path: ${{ github.workspace }}/${{ env.BUILD_DIR }}/OrcaSlicer
 
       - name: Upload artifacts Win installer
         if: runner.os == 'Windows' && !vars.SELF_HOSTED
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Windows_${{ env.ver }}${{ env.ARCH_SUFFIX }}
           path: ${{ github.workspace }}/${{ env.BUILD_DIR }}/OrcaSlicer*.exe
 
       - name: Upload artifacts Win PDB
         if: runner.os == 'Windows' && inputs.arch != 'arm64' && !vars.SELF_HOSTED
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: PDB
           path: ${{ github.workspace }}/build/src/Release/Debug_PDB_${{ env.ver }}_for_developers_only.7z
 
       - name: Upload OrcaSlicer_profile_validator Win
         if: runner.os == 'Windows' && inputs.arch != 'arm64' && !vars.SELF_HOSTED
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_profile_validator_Windows_${{ env.ver }}
           path: ${{ github.workspace }}/build/src/Release/OrcaSlicer_profile_validator.exe
@@ -692,7 +692,7 @@ jobs:
 
       - name: Upload artifacts Win MSIX
         if: runner.os == 'Windows' && !vars.SELF_HOSTED
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Windows_MSIX_${{ env.ver }}${{ env.ARCH_SUFFIX }}
           path: ${{ github.workspace }}/${{ env.BUILD_DIR }}/OrcaSlicer_Windows_MSIX_${{ env.ver }}${{ env.ARCH_SUFFIX }}.msix
@@ -721,7 +721,7 @@ jobs:
         # and doesn't preserve file permissions
       - name: Upload Test Artifact
         if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: ${{ github.sha }}-tests-linux-${{ inputs.arch == 'aarch64' && 'aarch64' || 'x86_64' }}
           overwrite: true
@@ -752,7 +752,7 @@ jobs:
         # SELF_HOSTED, which skips arm64.
       - name: Upload profile validator (for slice check)
         if: ${{ runner.os == 'Linux' && (vars.SELF_HOSTED && inputs.arch != 'aarch64' || !vars.SELF_HOSTED && inputs.arch == 'aarch64') }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: ${{ github.sha }}-profile-validator-linux-${{ inputs.arch == 'aarch64' && 'aarch64' || 'x86_64' }}
           overwrite: true
@@ -767,7 +767,13 @@ jobs:
         run: |
           test_repo_dir="${{ runner.temp }}/orca-test-repo"
           rm -rf "$test_repo_dir"
-          git clone --depth 1 https://github.com/OrcaSlicer/orca-test-repo.git "$test_repo_dir"
+          # Pinned: orca-test-repo has only `main`, which tracks upstream main.
+          # 4674f68b is its last commit before v2.5.0 shipped (2026-11-07);
+          # anything later may test post-2.5.0 behaviour. Move this pin when
+          # the baseline moves.
+          test_repo_ref=4674f68bbc784b303c15a3e8b9e47b45fb151725
+          git clone https://github.com/OrcaSlicer/orca-test-repo.git "$test_repo_dir"
+          git -C "$test_repo_dir" checkout --detach "$test_repo_ref"
           python3 "$test_repo_dir/run_test.py" "${{ github.workspace }}/build/package/bin/orca-slicer"
 
       - name: Build orca_custom_preset_tests
@@ -781,14 +787,14 @@ jobs:
 
       - name: Upload artifacts Ubuntu
         if: ${{ ! env.ACT && runner.os == 'Linux' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Linux_ubuntu_${{ env.ubuntu-ver }}${{ env.arch_suffix }}_${{ env.ver }}
           path: "./build/OrcaSlicer_Linux_AppImage${{ env.ubuntu-ver-str }}${{ env.arch_suffix }}_${{ env.ver }}.AppImage"
 
       - name: Upload OrcaSlicer_profile_validator Ubuntu
         if: ${{ ! env.ACT && runner.os == 'Linux' && !vars.SELF_HOSTED && inputs.arch != 'aarch64' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_profile_validator_Linux_ubuntu_${{ env.ubuntu-ver }}_${{ env.ver }}
           path: './build/src/Release/OrcaSlicer_profile_validator'
@@ -800,7 +806,7 @@ jobs:
       # so only the Linux binary is published.
       - name: Upload generate_system_cache Ubuntu
         if: ${{ ! env.ACT && runner.os == 'Linux' && !vars.SELF_HOSTED && inputs.arch != 'aarch64' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: generate_system_cache_Linux_ubuntu_${{ env.ubuntu-ver }}_${{ env.ver }}
           path: './build/src/dev-utils/Release/generate_system_cache'
@@ -855,7 +861,7 @@ jobs:
       - name: Save compiler cache
         id: ccache_save
         if: ${{ always() && steps.ccache_restore.outcome == 'success' && github.event_name != 'pull_request' }}
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ env.CCACHE_ENTRY }}

@@ -38,17 +38,17 @@ jobs:
 
       # Setup the environment
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           lfs: 'false'
 
       - name: load cached deps
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ github.workspace }}/${{ inputs.cache-path }}
           key: ${{ inputs.cache-key }}
 
-      - uses: lukka/get-cmake@latest
+      - uses: lukka/get-cmake@f86dd60acae0d132056913e248bdabf0e0580b7a # v4.4.5
         with:
           cmakeVersion: "~4.3.0"  # use most recent 4.3.x version
           useLocalCache: true         # <--= Use the local cache (default is 'false').
@@ -56,7 +56,7 @@ jobs:
 
       - name: setup dev on Windows
         if: runner.os == 'Windows'
-        uses: microsoft/setup-msbuild@v3
+        uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3
 
       - name: Get the date on Ubuntu and macOS
         if: runner.os != 'Windows'
@@ -71,7 +71,7 @@ jobs:
 
       - name: Install MSYS2 (clangarm64) with GMP/MPFR and LLVM tools
         if: runner.os == 'Windows' && inputs.arch == 'arm64'
-        uses: msys2/setup-msys2@v2
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2
         with:
           msystem: CLANGARM64
           update: true
@@ -147,24 +147,39 @@ jobs:
       - name: Build on Ubuntu
         if: runner.os == 'Linux'
         working-directory: ${{ github.workspace }}
+        env:
+          ORCASLICER_BUILD_LOG: ${{ runner.temp }}/orcaslicer-build-deps.log
+        shell: bash
         run: |
+          set -euo pipefail
+          {
             mkdir -p ${{ github.workspace }}/deps/build/destdir
             ./build_linux.sh -drlL
             cd deps/build
             tar -czvf OrcaSlicer_dep_ubuntu_$(date +"%Y%m%d").tar.gz destdir
+          } 2>&1 | tee "$ORCASLICER_BUILD_LOG"
+
+      - name: Upload Linux dependency build log
+        if: ${{ always() && runner.os == 'Linux' }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: orcaslicer-linux-dependency-build-log-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/orcaslicer-build-deps.log
+          if-no-files-found: warn
+          retention-days: 14
 
 
       # Upload Artifacts
       # - name: Upload Mac ${{ inputs.arch }} artifacts
       #   if: runner.os == 'macOS'
-      #   uses: actions/upload-artifact@v6
+      #   uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
       #   with:
       #     name: OrcaSlicer_dep_mac_${{ env.date }}
       #     path: ${{ github.workspace }}/deps/build/OrcaSlicer_dep*.tar.gz
 
       # - name: Upload Windows artifacts
       #   if: runner.os == 'Windows'
-      #   uses: actions/upload-artifact@v6
+      #   uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
       #   with:
       #     name: OrcaSlicer_dep_win64_${{ env.date }}
       #     path: ${{ github.workspace }}/deps/build/OrcaSlicer_dep*.zip
@@ -173,7 +188,7 @@ jobs:
       #   if: runner.os == 'Linux' && !env.ACT
       #   env:
       #     ubuntu-ver: '2404'
-      #   uses: actions/upload-artifact@v6
+      #   uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
       #   with:
       #     name: OrcaSlicer_dep_ubuntu_${{ env.ubuntu-ver }}_${{ env.date }}
       #     path: ${{ github.workspace }}/deps/build/OrcaSlicer_dep_ubuntu_*.tar.gz

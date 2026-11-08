@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 APPIMAGETOOLURL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-$(uname -m).AppImage"
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
+# CMake configures this into the build dir, so the template's own location
+# says nothing about where the repo is; take it from CMake instead.
+REPO_ROOT="@CMAKE_SOURCE_DIR@"
 
 
 APP_IMAGE="@SLIC3R_APP_KEY@_Linux_V@SoftFever_VERSION@.AppImage"
@@ -41,7 +42,9 @@ cp "${REPO_ROOT}/scripts/flatpak/com.orcaslicer.@SLIC3R_APP_KEY@.metainfo.xml" \
 
 export ARCH=$(uname -m)
 
-if [ -f /.dockerenv ] ; then # Only run if inside of a Docker Container
+# appimagetool is itself an AppImage: without FUSE (Docker, or an unprivileged
+# CI pod with no /.dockerenv and no /dev/fuse) it must extract-and-run.
+if [ -f /.dockerenv ] || [ ! -e /dev/fuse ] ; then
   ../appimagetool.AppImage --appimage-extract-and-run . $([ -n "${container}" ] && echo '--appimage-extract-and-run')
 else
   ../appimagetool.AppImage . $([ -n "${container}" ] && echo '--appimage-extract-and-run')
