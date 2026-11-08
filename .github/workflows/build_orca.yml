@@ -484,7 +484,13 @@ jobs:
         run: |
           test_repo_dir="${{ runner.temp }}/orca-test-repo"
           rm -rf "$test_repo_dir"
-          git clone --depth 1 https://github.com/OrcaSlicer/orca-test-repo.git "$test_repo_dir"
+          # Pinned: orca-test-repo has only `main`, which tracks upstream main.
+          # 0dfd8df4 is its last commit before v2.4.2 shipped (2026-07-07); the
+          # pytest CLI suite added since (2026-09) tests post-2.4.2 behaviour
+          # and fails 25 cases here. Move this pin when the baseline moves.
+          test_repo_ref=0dfd8df467895d7093d50b267c7209fd53f43a40
+          git clone https://github.com/OrcaSlicer/orca-test-repo.git "$test_repo_dir"
+          git -C "$test_repo_dir" checkout --detach "$test_repo_ref"
           python3 "$test_repo_dir/run_test.py" "${{ github.workspace }}/build/package/bin/orca-slicer"
 
       - name: Build orca_custom_preset_tests
