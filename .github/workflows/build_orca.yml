@@ -37,19 +37,19 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: 'false'
 
       - name: load cached deps
         if: ${{ !(runner.os == 'macOS' && inputs.macos-combine-only) }}
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: ${{ inputs.cache-path }}
           key: ${{ inputs.cache-key }}
           fail-on-cache-miss: true
 
-      - uses: lukka/get-cmake@latest
+      - uses: lukka/get-cmake@f86dd60acae0d132056913e248bdabf0e0580b7a # v4.4.5
         # The windows-11-arm runner needs CMake <= 3.31 (handled in the next step).
         if: ${{ !(runner.os == 'Windows' && inputs.arch == 'arm64') }}
         with:
@@ -152,14 +152,14 @@ jobs:
 
       - name: Upload macOS app bundle ${{ inputs.arch }}
         if: runner.os == 'macOS' && !inputs.macos-combine-only
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Mac_bundle_${{ inputs.arch }}_${{ github.sha }}
           path: ${{ github.workspace }}/OrcaSlicer_Mac_bundle_${{ inputs.arch }}_${{ github.sha }}.tar.gz
 
       - name: Download macOS app bundles
         if: runner.os == 'macOS' && inputs.macos-combine-only
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: OrcaSlicer_Mac_bundle_*_${{ github.sha }}
           path: ${{ github.workspace }}/mac_bundles
@@ -262,7 +262,7 @@ jobs:
       # failed run keeps them available for a re-run instead of forcing a full rebuild.
       - name: Delete intermediate per-arch artifacts
         if: success() && runner.os == 'macOS' && inputs.macos-combine-only
-        uses: geekyeggo/delete-artifact@v6
+        uses: geekyeggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
         with:
           name: |
             OrcaSlicer_Mac_bundle_arm64_${{ github.sha }}
@@ -270,14 +270,14 @@ jobs:
 
       - name: Upload artifacts mac
         if: runner.os == 'macOS' && inputs.macos-combine-only
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Mac_universal_${{ env.ver }}
           path: ${{ github.workspace }}/OrcaSlicer_Mac_universal_${{ env.ver }}.dmg
 
       - name: Upload OrcaSlicer_profile_validator DMG mac
         if: runner.os == 'macOS' && inputs.macos-combine-only && !vars.SELF_HOSTED
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_profile_validator_Mac_universal_DMG_${{ env.ver }}
           path: ${{ github.workspace }}/OrcaSlicer_profile_validator_Mac_universal_${{ env.ver }}.dmg
@@ -285,7 +285,7 @@ jobs:
 
       - name: Deploy Mac release
         if: github.repository == 'OrcaSlicer/OrcaSlicer' && env.deploy_nightly == 'true' && runner.os == 'macOS' && inputs.macos-combine-only && !vars.SELF_HOSTED
-        uses: WebFreak001/deploy-nightly@v3.2.0
+        uses: WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b # v3.2.0
         with:
           upload_url: https://uploads.github.com/repos/OrcaSlicer/OrcaSlicer/releases/137995723/assets{?name,label}
           release_id: 137995723
@@ -296,7 +296,7 @@ jobs:
 
       - name: Deploy Mac OrcaSlicer_profile_validator DMG release
         if: github.repository == 'OrcaSlicer/OrcaSlicer' && github.ref == 'refs/heads/main' && runner.os == 'macOS' && inputs.macos-combine-only && !vars.SELF_HOSTED
-        uses: WebFreak001/deploy-nightly@v3.2.0
+        uses: WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b # v3.2.0
         with:
           upload_url: https://uploads.github.com/repos/OrcaSlicer/OrcaSlicer/releases/137995723/assets{?name,label}
           release_id: 137995723
@@ -320,7 +320,7 @@ jobs:
 
       - name: setup MSVC
         if: runner.os == 'Windows'
-        uses: microsoft/setup-msbuild@v3
+        uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3
 
       - name: Install nsis
         if: runner.os == 'Windows' && !vars.SELF_HOSTED
@@ -362,35 +362,35 @@ jobs:
 
       - name: Upload artifacts Win zip
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Windows_${{ env.ver }}${{ env.ARCH_SUFFIX }}_portable
           path: ${{ github.workspace }}/${{ env.BUILD_DIR }}/OrcaSlicer
 
       - name: Upload artifacts Win installer
         if: runner.os == 'Windows' && !vars.SELF_HOSTED
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Windows_${{ env.ver }}${{ env.ARCH_SUFFIX }}
           path: ${{ github.workspace }}/${{ env.BUILD_DIR }}/OrcaSlicer*.exe
 
       - name: Upload artifacts Win PDB
         if: runner.os == 'Windows' && inputs.arch != 'arm64' && !vars.SELF_HOSTED
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: PDB
           path: ${{ github.workspace }}/build/src/Release/Debug_PDB_${{ env.ver }}_for_developers_only.7z
 
       - name: Upload OrcaSlicer_profile_validator Win
         if: runner.os == 'Windows' && inputs.arch != 'arm64' && !vars.SELF_HOSTED
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_profile_validator_Windows_${{ env.ver }}
           path: ${{ github.workspace }}/build/src/Release/OrcaSlicer_profile_validator.exe
 
       - name: Deploy Windows release portable
         if: github.repository == 'OrcaSlicer/OrcaSlicer' && env.deploy_nightly == 'true' && runner.os == 'Windows' && !vars.SELF_HOSTED
-        uses: WebFreak001/deploy-nightly@v3.2.0
+        uses: WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b # v3.2.0
         with:
           upload_url: https://uploads.github.com/repos/OrcaSlicer/OrcaSlicer/releases/137995723/assets{?name,label}
           release_id: 137995723
@@ -401,7 +401,7 @@ jobs:
 
       - name: Deploy Windows release installer
         if: github.repository == 'OrcaSlicer/OrcaSlicer' && env.deploy_nightly == 'true' && runner.os == 'Windows' && !vars.SELF_HOSTED
-        uses: WebFreak001/deploy-nightly@v3.2.0
+        uses: WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b # v3.2.0
         with:
           upload_url: https://uploads.github.com/repos/OrcaSlicer/OrcaSlicer/releases/137995723/assets{?name,label}
           release_id: 137995723
@@ -412,7 +412,7 @@ jobs:
 
       - name: Deploy Windows OrcaSlicer_profile_validator release
         if: github.repository == 'OrcaSlicer/OrcaSlicer' && github.ref == 'refs/heads/main' && runner.os == 'Windows' && inputs.arch != 'arm64' && !vars.SELF_HOSTED
-        uses: WebFreak001/deploy-nightly@v3.2.0
+        uses: WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b # v3.2.0
         with:
           upload_url: https://uploads.github.com/repos/OrcaSlicer/OrcaSlicer/releases/137995723/assets{?name,label}
           release_id: 137995723
@@ -436,7 +436,7 @@ jobs:
 
       - name: Upload artifacts Win MSIX
         if: runner.os == 'Windows' && !vars.SELF_HOSTED
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Windows_MSIX_${{ env.ver }}${{ env.ARCH_SUFFIX }}
           path: ${{ github.workspace }}/${{ env.BUILD_DIR }}/OrcaSlicer_Windows_MSIX_${{ env.ver }}${{ env.ARCH_SUFFIX }}.msix
@@ -469,7 +469,7 @@ jobs:
         # and doesn't preserve file permissions
       - name: Upload Test Artifact
         if: runner.os == 'Linux' && ((!vars.SELF_HOSTED && inputs.arch == 'aarch64') || (vars.SELF_HOSTED && inputs.arch != 'aarch64'))
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: ${{ github.sha }}-tests
           overwrite: true
@@ -484,7 +484,13 @@ jobs:
         run: |
           test_repo_dir="${{ runner.temp }}/orca-test-repo"
           rm -rf "$test_repo_dir"
-          git clone --depth 1 https://github.com/OrcaSlicer/orca-test-repo.git "$test_repo_dir"
+          # Pinned: orca-test-repo has only `main`, which tracks upstream main.
+          # 0dfd8df4 is its last commit before v2.4.2 shipped (2026-07-07); the
+          # pytest CLI suite added since (2026-09) tests post-2.4.2 behaviour
+          # and fails 25 cases here. Move this pin when the baseline moves.
+          test_repo_ref=0dfd8df467895d7093d50b267c7209fd53f43a40
+          git clone https://github.com/OrcaSlicer/orca-test-repo.git "$test_repo_dir"
+          git -C "$test_repo_dir" checkout --detach "$test_repo_ref"
           python3 "$test_repo_dir/run_test.py" "${{ github.workspace }}/build/package/bin/orca-slicer"
 
       - name: Build orca_custom_preset_tests
@@ -498,21 +504,21 @@ jobs:
 
       - name: Upload artifacts Ubuntu
         if: ${{ ! env.ACT && runner.os == 'Linux' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_Linux_ubuntu_${{ env.ubuntu-ver }}${{ env.arch_suffix }}_${{ env.ver }}
           path: "./build/OrcaSlicer_Linux_AppImage${{ env.ubuntu-ver-str }}${{ env.arch_suffix }}_${{ env.ver }}.AppImage"
 
       - name: Upload OrcaSlicer_profile_validator Ubuntu
         if: ${{ ! env.ACT && runner.os == 'Linux' && !vars.SELF_HOSTED && inputs.arch != 'aarch64' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: OrcaSlicer_profile_validator_Linux_ubuntu_${{ env.ubuntu-ver }}_${{ env.ver }}
           path: './build/src/Release/OrcaSlicer_profile_validator'
 
       - name: Deploy Ubuntu release
         if: ${{ github.repository == 'OrcaSlicer/OrcaSlicer' && ! env.ACT && env.deploy_nightly == 'true' && runner.os == 'Linux' && !vars.SELF_HOSTED }}
-        uses: WebFreak001/deploy-nightly@v3.2.0
+        uses: WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b # v3.2.0
         with:
           upload_url: https://uploads.github.com/repos/OrcaSlicer/OrcaSlicer/releases/137995723/assets{?name,label}
           release_id: 137995723
@@ -522,16 +528,18 @@ jobs:
           max_releases: 1 # optional, if there are more releases than this matching the asset_name, the oldest ones are going to be deleted
       - name: Deploy Ubuntu release
         if: ${{ github.repository == 'OrcaSlicer/OrcaSlicer' && ! env.ACT && github.ref == 'refs/heads/main' && runner.os == 'Linux' && !vars.SELF_HOSTED && inputs.arch != 'aarch64' }}
-        uses: rickstaa/action-create-tag@v1
-        with:
-          tag: "nightly-builds"
-          tag_exists_error: false
-          force_push_tag: true
-          message: "nightly-builds"
+        # Plain git instead of rickstaa/action-create-tag: that is a Docker
+        # container action, and the runner builds every container action in a
+        # job at setup even when its step is skipped, so a Docker-less runner
+        # failed the whole job. Same effect: force-move an annotated tag.
+        run: |
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            tag -f -a nightly-builds -m nightly-builds
+          git push -f origin refs/tags/nightly-builds
 
       - name: Deploy Ubuntu OrcaSlicer_profile_validator release
         if: ${{ github.repository == 'OrcaSlicer/OrcaSlicer' && ! env.ACT && github.ref == 'refs/heads/main' && runner.os == 'Linux' && !vars.SELF_HOSTED && inputs.arch != 'aarch64' }}
-        uses: WebFreak001/deploy-nightly@v3.2.0
+        uses: WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b # v3.2.0
         with:
           upload_url: https://uploads.github.com/repos/OrcaSlicer/OrcaSlicer/releases/137995723/assets{?name,label}
           release_id: 137995723
@@ -542,7 +550,7 @@ jobs:
 
       - name: Deploy orca_custom_preset_tests
         if: ${{ github.repository == 'OrcaSlicer/OrcaSlicer' && ! env.ACT && github.ref == 'refs/heads/main' && runner.os == 'Linux' && !vars.SELF_HOSTED && inputs.arch != 'aarch64' }}
-        uses: WebFreak001/deploy-nightly@v3.2.0
+        uses: WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b # v3.2.0
         with:
           upload_url: https://uploads.github.com/repos/OrcaSlicer/OrcaSlicer/releases/137995723/assets{?name,label}
           release_id: 137995723
