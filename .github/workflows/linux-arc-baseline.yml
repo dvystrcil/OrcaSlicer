@@ -1,0 +1,68 @@
+name: Linux baseline build
+
+# Linux x86_64 build of the 2.5.0 baseline on this fork's self-hosted runner,
+# reusing upstream's build_check_cache / build_deps / build_orca workflows.
+#
+# The self-hosted runner only ever runs code from THIS repository:
+#   - a pull request from a fork is skipped here (both jobs), and the repository
+#     requires maintainer approval before any outside contributor's workflow
+#     runs at all -- the approval is the real gate, because a fork PR can edit
+#     this file;
+#   - no secrets are passed to the reusable workflows (the Linux build needs
+#     none);
+#   - the runner itself is unprivileged: the preflight below fails the run if
+#     it is root or can use sudo, so a loosened runner is noticed, not used.
+on:
+  push:
+    branches:
+      - baseline-2.5.0
+  pull_request:
+    branches:
+      - baseline-2.5.0
+  workflow_dispatch:
+
+# Serialize this expensive native C++ build across branch and PR runs.
+concurrency:
+  group: orcaslicer-linux-baseline
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  runner-preflight:
+    name: Runner is unprivileged
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: orcaslicer-build-runner
+    timeout-minutes: 5
+    steps:
+      - name: Not root, no sudo, bounded parallelism
+        shell: bash
+        run: |
+          set -euo pipefail
+          id
+          if [ "$(id -u)" -eq 0 ]; then
+            echo "::error::runner is root; it must be unprivileged"
+            exit 1
+          fi
+          if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+            echo "::error::runner can use sudo; privilege escalation must be disabled"
+            exit 1
+          fi
+          if [ -z "${CMAKE_BUILD_PARALLEL_LEVEL:-}" ]; then
+            echo "::error::CMAKE_BUILD_PARALLEL_LEVEL is unset; the dependency build would use every host core"
+            exit 1
+          fi
+          echo "CMAKE_BUILD_PARALLEL_LEVEL=$CMAKE_BUILD_PARALLEL_LEVEL nproc=$(nproc)"
+          echo "memory limit: $(cat /sys/fs/cgroup/memory.max 2>/dev/null || echo unknown)"
+          df -h "$GITHUB_WORKSPACE" | tail -1
+          echo "RUNNER-PREFLIGHT-OK"
+
+  linux-x86_64:
+    name: Linux x86_64
+    needs: runner-preflight
+    uses: ./.github/workflows/build_check_cache.yml
+    with:
+      os: orcaslicer-build-runner
+      build-deps-only: false
+      force-build: false
