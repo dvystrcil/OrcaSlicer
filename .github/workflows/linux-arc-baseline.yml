@@ -33,7 +33,7 @@ jobs:
   runner-preflight:
     name: Runner is unprivileged
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: orcaslicer-build-runner
+    runs-on: orcaslicer-runner
     timeout-minutes: 5
     steps:
       - name: Not root, no sudo, bounded parallelism
@@ -63,6 +63,6 @@ jobs:
     needs: runner-preflight
     uses: ./.github/workflows/build_check_cache.yml
     with:
-      os: orcaslicer-build-runner
+      os: orcaslicer-runner
       build-deps-only: false
       force-build: false
